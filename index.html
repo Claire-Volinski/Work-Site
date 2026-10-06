@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ed">
+  <title>Study Sprout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #252c29;
+      --muted: #777d76;
+      --line: #e5e6dc;
+      --paper: #f4f4ed;
+      --white: #fffefa;
+      --green: #397c58;
+      --green-dark: #295e43;
+      --green-pale: #e5f0e5;
+      --coral: #de795d;
+      --yellow: #efd66e;
+      --blue: #92b8c2;
+      --shadow: 0 3px 0 #e7e7dd;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); min-width: 320px; }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    .app-shell { min-height: 100vh; display: grid; grid-template-columns: 244px minmax(0, 1fr); }
+    .sidebar { background: #fbfbf6; border-right: 1px solid var(--line); padding: 27px 17px 20px; display: flex; flex-direction: column; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px; }
+    .brand-sprout { width: 33px; height: 33px; display: grid; place-items: center; background: var(--green-pale); border: 1px solid #d2e1d1; border-radius: 10px; color: var(--green); font-size: 20px; }
+    .brand strong { font-size: 17px; font-weight: 900; letter-spacing: 0; }
+    .side-label { color: #94978e; font: 500 10px 'DM Mono', monospace; letter-spacing: 0; text-transform: uppercase; padding: 0 11px; margin-bottom: 8px; }
+    .nav-list { display: grid; gap: 4px; }
+    .nav-item { border: 0; background: transparent; width: 100%; display: flex; align-items: center; gap: 10px; border-radius: 8px; padding: 10px 11px; text-align: left; cursor: pointer; font-size: 13px; font-weight: 700; color: #60675f; transition: background .16s, color .16s; }
+    .nav-item:hover { background: #f0f1e9; }
+    .nav-item.active { background: var(--green-pale); color: var(--green-dark); }
+    .nav-icon { width: 20px; text-align: center; color: #7d8c7e; font-size: 15px; }
+    .class-heading { display: flex; justify-content: space-between; align-items: center; }
+    .add-class-button { border: 0; background: transparent; color: #718274; font-size: 18px; width: 28px; height: 27px; border-radius: 6px; cursor: pointer; }
+    .add-class-button:hover { background: var(--green-pale); color: var(--green-dark); }
+    .class-nav .nav-item { font-weight: 600; }
+    .class-dot { flex: 0 0 9px; width: 9px; height: 9px; border-radius: 2px; background: var(--dot, var(--green)); }
+    .sidebar-bottom { margin-top: auto; }
+    .companion-card { border: 1px solid #e5e7dc; border-radius: 9px; background: #f5f6ec; padding: 13px; }
+    .companion-wrap { display: flex; align-items: center; gap: 10px; }
+    .pixel-buddy { width: 42px; height: 42px; flex: 0 0 42px; image-rendering: pixelated; }
+    .buddy-copy { min-width: 0; }
+    .buddy-copy strong { font-size: 12px; display: block; }
+    .buddy-copy span { font-size: 11px; color: var(--muted); }
+    .xp-track { height: 5px; background: #e1e5d7; border-radius: 5px; margin-top: 12px; overflow: hidden; }
+    .xp-fill { height: 100%; width: 0; background: #76a66f; border-radius: inherit; transition: width .3s; }
+    .xp-caption { display: flex; justify-content: space-between; color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 6px; }
+    .main { min-width: 0; padding: 31px clamp(20px, 4vw, 58px) 55px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
+    .date-label { font: 11px 'DM Mono', monospace; color: #848980; text-transform: uppercase; }
+    .top-right { display: flex; align-items: center; gap: 10px; }
+    .streak-pill { background: #fff7d8; border: 1px solid #eee3b3; border-radius: 20px; padding: 7px 11px; font: 11px 'DM Mono', monospace; color: #6e5c23; }
+    .avatar-small { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #dce9d8; font-size: 18px; }
+    .greeting-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 27px; }
+    h1 { font-size: clamp(25px, 3vw, 34px); line-height: 1.12; letter-spacing: 0; margin: 6px 0 8px; font-weight: 900; }
+    .greeting-sub { color: var(--muted); margin: 0; font-size: 14px; }
+    .primary-button, .secondary-button, .quiet-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 800; transition: background .16s, transform .16s; }
+    .primary-button { color: white; background: var(--green); border: 1px solid var(--green); padding: 10px 14px; box-shadow: 0 2px 0 var(--green-dark); }
+    .primary-button:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .secondary-button { color: var(--green-dark); background: #f4f8f0; border: 1px solid #dce8d8; padding: 8px 11px; }
+    .secondary-button:hover { background: var(--green-pale); }
+    .quiet-button { border: 0; background: transparent; color: #778077; padding: 7px 9px; }
+    .quiet-button:hover { background: #f1f1e9; color: var(--ink); }
+    .icon-button { border: 0; background: transparent; cursor: pointer; color: #80857e; padding: 5px 7px; border-radius: 5px; }
+    .icon-button:hover { background: #eeefe8; color: var(--ink); }
+    .overview-grid { display: grid; grid-template-columns: minmax(0, 1fr) 285px; gap: 17px; align-items: stretch; margin-bottom: 26px; }
+    .focus-card { border-radius: 9px; background: #e8f0e5; min-height: 202px; padding: 20px 22px; display: flex; justify-content: space-between; align-items: center; overflow: hidden; position: relative; }
+    .focus-card:after { content: ''; position: absolute; right: 82px; top: 0; height: 100%; width: 1px; background: #d9e5d6; }
+    .focus-copy { position: relative; z-index: 1; max-width: 300px; }
+    .eyebrow { font: 10px 'DM Mono', monospace; text-transform: uppercase; color: #72816f; }
+    .focus-copy h2 { font-size: 18px; margin: 7px 0 6px; font-weight: 900; }
+    .focus-copy p { color: #6e786a; font-size: 12px; line-height: 1.5; margin: 0 0 15px; max-width: 250px; }
+    .focus-art { width: 114px; min-width: 104px; display: grid; place-items: center; position: relative; z-index: 1; }
+    .focus-art .pixel-buddy { width: 78px; height: 78px; }
+    .art-spark { position: absolute; color: #c6aa47; font-size: 15px; }
+    .art-spark.one { top: 6px; right: 9px; }.art-spark.two { bottom: 8px; left: 3px; font-size: 11px; }
+    .stats-card { border: 1px solid var(--line); background: var(--white); border-radius: 9px; padding: 17px; display: flex; flex-direction: column; justify-content: space-between; }
+    .stats-title { color: var(--muted); font: 10px 'DM Mono', monospace; text-transform: uppercase; }
+    .stats-number { font-size: 28px; font-weight: 900; margin: 6px 0 1px; }
+    .stats-sub { color: var(--muted); font-size: 11px; }
+    .stats-divider { border: 0; border-top: 1px solid var(--line); width: 100%; margin: 10px 0; }
+    .week-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .day-mark { display: grid; gap: 5px; justify-items: center; color: #959991; font: 9px 'DM Mono', monospace; }
+    .day-mark b { width: 18px; height: 18px; border-radius: 5px; background: #f0f1eb; }
+    .day-mark.done b { background: #80a978; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
+    .section-heading h2 { margin: 0; font-size: 16px; font-weight: 900; }
+    .section-heading p { font-size: 11px; color: var(--muted); margin: 4px 0 0; }
+    .progress-text { font: 10px 'DM Mono', monospace; color: #848a80; white-space: nowrap; }
+    .task-section { margin-bottom: 29px; }
+    .task-list { border-top: 1px solid var(--line); }
+    .task-row { display: grid; grid-template-columns: 21px minmax(0,1fr) auto; align-items: center; gap: 11px; border-bottom: 1px solid var(--line); padding: 12px 5px; min-height: 49px; }
+    .check-button { width: 19px; height: 19px; border: 1.5px solid #bdc4b9; border-radius: 5px; background: transparent; cursor: pointer; padding: 0; display: grid; place-items: center; color: white; }
+    .check-button:hover { border-color: var(--green); }
+    .task-row.completed .check-button { background: #73a06d; border-color: #73a06d; }
+    .task-row.completed .task-title { text-decoration: line-through; color: #93988f; }
+    .task-info { min-width: 0; }
+    .task-title { font-size: 12px; font-weight: 800; display: block; overflow-wrap: anywhere; }
+    .task-meta { color: #898e85; font-size: 10px; margin-top: 3px; display: block; }
+    .task-xp { font: 10px 'DM Mono', monospace; color: #8d8e77; white-space: nowrap; }
+    .empty-state { border: 1px dashed #d5d8cd; border-radius: 8px; padding: 21px; color: #858a80; text-align: center; font-size: 12px; }
+    .empty-state strong { color: #515a51; display: block; margin-bottom: 4px; }
+    .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 24px; }
+    .page-head .greeting-sub { max-width: 520px; }
+    .class-page-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+    .unit-list { display: grid; gap: 12px; }
+    .lecture-notes-section { margin-top: 25px; }
+    .lecture-note-list { display: grid; gap: 9px; }
+    .lecture-note-card { border: 1px solid var(--line); border-radius: 8px; background: var(--white); padding: 13px 15px; }
+    .lecture-note-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .lecture-note-date { font: 10px 'DM Mono', monospace; color: #71816f; }
+    .lecture-note-actions { display: flex; }
+    .lecture-note-fields { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 13px; margin-top: 11px; }
+    .lecture-note-field strong { display: block; color: #677462; font: 10px 'DM Mono', monospace; text-transform: uppercase; }
+    .lecture-note-field p { color: #555d54; font-size: 11px; line-height: 1.5; margin: 5px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .unit-card { border: 1px solid var(--line); border-radius: 8px; background: var(--white); overflow: hidden; }
+    .unit-card > summary { list-style: none; cursor: pointer; }
+    .unit-card > summary::-webkit-details-marker { display: none; }
+    .unit-card > summary::marker { content: ''; }
+    .unit-card > summary::after { content: '+'; color: #778576; font: 14px 'DM Mono', monospace; }
+    .unit-card[open] > summary::after { content: '−'; }
+    .unit-card > .unit-actions { justify-content: flex-end; padding: 3px 12px; border-bottom: 1px solid #ecece4; }
+    .unit-content-group { min-width: 0; }
+    .unit-content-group > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .unit-content-group > summary::-webkit-details-marker { display: none; }
+    .unit-content-group > summary::marker { content: ''; }
+    .unit-content-group > summary::after { content: '+'; color: #899185; font: 12px 'DM Mono', monospace; }
+    .unit-content-group[open] > summary::after { content: '−'; }
+    .unit-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 13px 15px; border-bottom: 1px solid #ecece4; }
+    .unit-title-wrap { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .unit-number { font: 10px 'DM Mono', monospace; color: #899185; background: #f1f2eb; padding: 5px 7px; border-radius: 4px; }
+    .unit-title { font-size: 13px; font-weight: 900; overflow-wrap: anywhere; }
+    .unit-actions { display: flex; align-items: center; }
+    .unit-body { padding: 13px 15px 14px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(190px, .9fr); gap: 18px; }
+    .unit-subhead { font: 10px 'DM Mono', monospace; color: #888e83; text-transform: uppercase; margin: 0 0 9px; }
+    .unit-task { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+    .unit-task .check-button { flex: 0 0 17px; width: 17px; height: 17px; font-size: 10px; }
+    .unit-task .task-title { font-size: 11px; font-weight: 700; }
+    .unit-task .icon-button { margin-left: auto; }
+    .link-list { display: grid; gap: 7px; }
+    .resource-link { display: flex; align-items: center; justify-content: space-between; gap: 7px; border: 1px solid #eceee7; border-radius: 6px; padding: 7px 8px; color: #426f55; font-size: 11px; font-weight: 700; text-decoration: none; min-width: 0; }
+    .resource-link:hover { background: #f4f8f1; border-color: #d5e4d3; }
+    .resource-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .resource-link-actions { display: flex; align-items: center; flex: 0 0 auto; }
+    .inline-add { border: 0; background: transparent; color: #748573; font-size: 10px; font-weight: 800; padding: 6px 0 0; cursor: pointer; }
+    .inline-add:hover { color: var(--green-dark); }
+    .segmented-control { display: inline-flex; gap: 3px; padding: 3px; background: #eeefe8; border-radius: 7px; }
+    .segment-button { border: 0; border-radius: 5px; padding: 7px 12px; background: transparent; color: #73796f; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .segment-button.active { background: var(--white); color: var(--green-dark); box-shadow: 0 1px 3px #252c2918; }
+    .routine-list { border-top: 1px solid var(--line); margin-top: 16px; }
+    .routine-row { display: grid; grid-template-columns: 21px minmax(0,1fr) auto; align-items: center; gap: 11px; border-bottom: 1px solid var(--line); padding: 12px 5px; min-height: 49px; }
+    .routine-row.completed .routine-title { text-decoration: line-through; color: #93988f; }
+    .routine-title { font-size: 12px; font-weight: 800; overflow-wrap: anywhere; }
+    .routine-actions { display: flex; align-items: center; }
+    .calendar-layout { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(260px,.8fr); gap: 16px; align-items: start; }
+    .calendar-panel, .calendar-events { border: 1px solid var(--line); border-radius: 9px; background: var(--white); padding: 17px; }
+    .calendar-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .calendar-toolbar h2 { font-size: 15px; margin: 0; font-weight: 900; }
+    .calendar-month-controls { display: flex; align-items: center; gap: 5px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 4px; }
+    .calendar-weekday { text-align: center; color: #888e83; font: 9px 'DM Mono', monospace; padding: 5px 0 8px; }
+    .calendar-cell { min-width: 0; aspect-ratio: 1 / .88; }
+    .calendar-day-button { width: 100%; height: 100%; min-height: 39px; border: 1px solid transparent; border-radius: 6px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font: 11px 'DM Mono', monospace; }
+    .calendar-day-button:hover { background: #f1f4eb; }
+    .calendar-day-button.selected { background: var(--green-pale); border-color: #d3e3d1; color: var(--green-dark); font-weight: 500; }
+    .calendar-day-button.today:not(.selected) { border-color: #d8b95a; }
+    .calendar-dots { height: 4px; display: flex; gap: 2px; }
+    .calendar-dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--coral); }
+    .calendar-events h2 { font-size: 14px; margin: 0; font-weight: 900; }
+    .planner-layout { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(300px,.85fr); gap: 16px; align-items: start; }
+    .planner-task-panel { border: 1px solid var(--line); border-radius: 9px; background: var(--white); padding: 16px; min-width: 0; }
+    .planner-task-panel .routine-list { margin-top: 0; }
+    .planner-task-panel .section-heading { margin-bottom: 10px; }
+    .planner-calendar .calendar-layout { display: block; }
+    .planner-calendar .calendar-events { margin-top: 12px; }
+    .calendar-events-date { color: var(--muted); font: 10px 'DM Mono', monospace; margin-top: 4px; }
+    .event-list { display: grid; gap: 8px; margin-top: 15px; }
+    .event-card { border: 1px solid #e8e9e1; border-left: 3px solid var(--coral); border-radius: 6px; padding: 9px 10px; }
+    .event-card.completed { background: #f7f8f2; }
+    .event-card.completed .event-title { color: #899084; text-decoration: line-through; }
+    .event-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 5px; }
+    .event-card strong { font-size: 11px; overflow-wrap: anywhere; }
+    .event-card p { color: var(--muted); font-size: 10px; margin: 4px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .event-time { color: #858b80; font: 10px 'DM Mono', monospace; margin-top: 4px; }
+    .event-links { display: flex; flex-wrap: wrap; gap: 9px; }
+    .event-links a, .event-links button { border: 0; padding: 0; background: transparent; color: var(--green); text-decoration: none; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .event-links a:hover, .event-links button:hover { text-decoration: underline; }
+    .event-links button[aria-pressed="true"] { color: #8a9085; }
+    .archive-list { display: grid; gap: 9px; }
+    .archive-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); background: var(--white); border-radius: 8px; padding: 13px 15px; }
+    .archive-row-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .archive-row-main strong { display: block; font-size: 12px; }
+    .archive-row-main span { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .archive-row-actions { display: flex; align-items: center; gap: 5px; }
+    .focus-panel { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 17px; }
+    .timer-card, .focus-side-card { border: 1px solid var(--line); border-radius: 9px; background: var(--white); padding: 22px; }
+    .timer-card { text-align: center; }
+    .timer-face { font: 500 clamp(48px, 8vw, 76px) 'DM Mono', monospace; margin: 18px 0 9px; color: #345e46; }
+    .timer-status { color: var(--muted); font-size: 12px; min-height: 19px; }
+    .timer-controls { display: flex; justify-content: center; gap: 8px; margin: 17px 0; }
+    .timer-settings { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .timer-settings select { border: 1px solid var(--line); border-radius: 5px; padding: 5px 7px; background: #fff; color: var(--ink); }
+    .select-label { display: block; text-align: left; font-size: 10px; color: #858a81; margin: 0 0 6px; }
+    .focus-select { width: 100%; border: 1px solid var(--line); background: white; border-radius: 6px; padding: 8px; font-size: 11px; }
+    .focus-side-card .pixel-buddy { width: 56px; height: 56px; }
+    .focus-note { background: #f3f5ec; padding: 10px; border-radius: 6px; margin-top: 14px; color: #6c7769; font-size: 11px; line-height: 1.55; }
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 12px); opacity: 0; pointer-events: none; z-index: 20; background: #283b2e; color: white; border-radius: 7px; padding: 10px 15px; font-size: 12px; font-weight: 700; transition: all .2s; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    dialog { border: 1px solid #dcdfd5; border-radius: 9px; padding: 0; width: min(420px, calc(100% - 30px)); background: var(--white); color: var(--ink); box-shadow: 0 18px 60px #252c2933; }
+    dialog::backdrop { background: #1d282255; backdrop-filter: blur(2px); }
+    .dialog-content { padding: 20px; }
+    .dialog-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 17px; }
+    .dialog-head h2 { font-size: 16px; margin: 0; }
+    .field { display: grid; gap: 6px; margin-bottom: 13px; }
+    .field label { font-size: 11px; font-weight: 800; color: #62695f; }
+    .field input, .field textarea, .field select { border: 1px solid #dfe2d7; background: white; border-radius: 6px; padding: 9px 10px; width: 100%; outline: none; font-size: 12px; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: #78a17c; box-shadow: 0 0 0 3px #e5f0e5; }
+    .field textarea { resize: vertical; min-height: 74px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .delete-button { color: #a34e3d; border: 1px solid #efd6cf; background: #fff7f3; border-radius: 6px; padding: 8px 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
+    @media (max-width: 820px) {
+      .app-shell { grid-template-columns: 205px minmax(0,1fr); }
+      .overview-grid { grid-template-columns: minmax(0,1fr); }
+      .stats-card { display: grid; grid-template-columns: 1fr 1.3fr; gap: 8px 20px; align-items: center; }
+      .stats-divider { display: none; }
+      .week-row { grid-row: span 2; grid-column: 2; }
+      .focus-panel { grid-template-columns: minmax(0,1fr); }
+      .calendar-layout { grid-template-columns: minmax(0,1fr); }
+      .planner-layout { grid-template-columns: minmax(0,1fr); }
+    }
+    @media (max-width: 620px) {
+      .app-shell { display: block; padding-bottom: 63px; }
+      .sidebar { position: fixed; z-index: 5; bottom: 0; left: 0; right: 0; height: 57px; padding: 4px 8px; border-right: 0; border-top: 1px solid var(--line); display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; overflow-x: auto; background: #fbfbf6; }
+      .brand, .sidebar-bottom, .class-heading, .side-label { display: none; }
+      .sidebar > div:first-of-type { display: contents; }
+      .nav-list { display: flex; gap: 2px; }
+      .nav-item { width: auto; padding: 8px 10px; flex-direction: column; gap: 2px; font-size: 9px; }
+      .nav-icon { font-size: 15px; }
+      .sidebar > div:nth-of-type(2), .sidebar > div:nth-of-type(3) { flex: 0 0 auto; }
+      .class-nav { max-width: 57vw; overflow-x: auto; }
+      .class-nav .nav-item { min-width: 62px; }
+      .main { padding: 22px 16px 35px; }
+      .topbar { margin-bottom: 25px; }
+      .greeting-row { align-items: flex-start; }
+      .greeting-row > .primary-button { padding: 9px; font-size: 0; }
+      .greeting-row > .primary-button span { font-size: 16px; }
+      .focus-card { padding: 17px; min-height: 180px; }
+      .focus-card:after { right: 72px; }
+      .focus-art { min-width: 88px; width: 88px; }
+      .focus-art .pixel-buddy { width: 65px; height: 65px; }
+      .unit-body { grid-template-columns: minmax(0,1fr); gap: 15px; }
+      .lecture-note-fields { grid-template-columns: minmax(0,1fr); gap: 10px; }
+      .page-head { align-items: center; }
+      .page-head > .primary-button { font-size: 0; padding: 9px 11px; }
+      .page-head > .primary-button span { font-size: 15px; }
+      .task-row { grid-template-columns: 21px minmax(0,1fr) auto; }
+      .calendar-panel, .calendar-events { padding: 12px; }
+      .calendar-day-button { min-height: 35px; }
+      .archive-row { align-items: flex-start; padding: 11px; }
+      .archive-row-actions { flex-wrap: wrap; justify-content: flex-end; }
+      .class-page-actions { gap: 5px; }
+      .class-page-actions .secondary-button { padding: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-sprout">✦</span><strong>Study Sprout</strong></div>
+      <div>
+        <div class="side-label">Workspace</div>
+        <nav class="nav-list" aria-label="Main navigation">
+          <button class="nav-item active" data-view="today"><span class="nav-icon">▦</span>Today</button>
+          <button class="nav-item" data-view="planner"><span class="nav-icon">▦</span>Planner</button>
+          <button class="nav-item" data-view="tasks"><span class="nav-icon">☷</span>Task lists</button>
+          <button class="nav-item" data-view="focus"><span class="nav-icon">◷</span>Focus room</button>
+        </nav>
+      </div>
+      <div>
+        <div class="class-heading"><div class="side-label">My classes</div><button class="add-class-button" id="addClassButton" aria-label="Add class" title="Add a class">+</button></div>
+        <nav class="nav-list class-nav" id="classNav" aria-label="Classes"></nav>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="companion-card">
+          <div class="companion-wrap"><canvas class="pixel-buddy" id="sideBuddy" width="16" height="16" aria-label="Your pixel study companion"></canvas><div class="buddy-copy"><strong id="buddyName">Pip is growing</strong><span id="buddyMood">Ready when you are</span></div></div>
+          <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+          <div class="xp-caption"><span id="levelLabel">LV 1</span><span id="xpLabel">0 / 100 XP</span></div>
+        </div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="date-label" id="dateLabel"></div><div class="top-right"><div class="streak-pill" id="streakLabel">✦ 0 day streak</div><div class="avatar-small" aria-hidden="true">🌱</div></div></header>
+      <div id="pageContent"></div>
+    </main>
+  </div>
+  <dialog id="editDialog"><form id="editForm" class="dialog-content"></form></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = 'study-sprout-v1';
+    const COLORS = ['#78a66f', '#de795d', '#8caec0', '#c8a34e', '#9c8bb4', '#dc9a70'];
+    const DAY_NAMES = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const sampleState = {
+      xp: 0, streak: 0, lastStudyDate: '', sessions: [], routines: [], events: [], collapsedUnits: [], collapsedUnitSections: [], selectedView: 'today', selectedClass: null,
+      classes: [
+        { id: 'biology', name: 'Biology', color: COLORS[0], units: [{ id: 'bio-u1', name: 'Cell Biology', tasks: [{ id: 'bio-t1', title: 'Review cell structure notes', done: false }, { id: 'bio-t2', title: 'Practice labeling the cell', done: false }], links: [{ id: 'bio-l1', title: 'Cell diagram reference', url: 'https://openstax.org/books/biology-2e/pages/4-introduction' }] }] },
+        { id: 'history', name: 'World History', color: COLORS[1], units: [{ id: 'hist-u1', name: 'The Ancient World', tasks: [{ id: 'hist-t1', title: 'Make a timeline of key dates', done: false }], links: [] }] },
+        { id: 'math', name: 'Algebra II', color: COLORS[2], units: [{ id: 'math-u1', name: 'Quadratic Functions', tasks: [{ id: 'math-t1', title: 'Finish practice set 3', done: false }], links: [] }] }
+      ]
+    };
+    let state = loadState();
+    let activeDialogSubmit = null;
+    let toastTimeout;
+    let timerInterval = null;
+    let timerSeconds = 25 * 60;
+    let timerSessionMinutes = 25;
+    let timerRunning = false;
+    let timerMode = 'focus';
+    let routineCadence = 'daily';
+    let calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let selectedCalendarDate = '';
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return saved && Array.isArray(saved.classes) ? { ...structuredClone(sampleState), ...saved } : structuredClone(sampleState);
+      } catch { return structuredClone(sampleState); }
+    }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]); }
+    function makeId() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`; }
+    function todayKey() { return localDateKey(new Date()); }
+    function allTasks() { return state.classes.filter(cls => !cls.archived).flatMap(cls => cls.units.flatMap(unit => unit.tasks.map(task => ({ ...task, classId: cls.id, className: cls.name, classColor: cls.color, unitId: unit.id, unitName: unit.name })))); }
+    function render() {
+      renderSidebar();
+      document.getElementById('dateLabel').textContent = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+      document.getElementById('streakLabel').textContent = `✦ ${state.streak || 0} day streak`;
+      if (state.selectedView === 'class') { renderClass(); decorateCollapsibleUnits(); decorateClassTaskActions(); }
+      else if (state.selectedView === 'focus') renderFocus();
+      else if (state.selectedView === 'tasks') { renderRoutines(); decorateRoutineAssignments(); }
+      else if (state.selectedView === 'calendar') { renderCalendar(); decorateCalendarEvents(); }
+      else if (state.selectedView === 'planner') renderPlanner();
+      else if (state.selectedView === 'archive') renderArchive();
+      else renderToday();
+      drawBuddy(document.getElementById('sideBuddy'), state.xp || 0);
+    }
+    function renderSidebar() {
+      document.querySelectorAll('[data-view]').forEach(button => button.classList.toggle('active', button.dataset.view === state.selectedView));
+      const activeClasses = state.classes.filter(cls => !cls.archived);
+      document.getElementById('classNav').innerHTML = `${activeClasses.map(cls => `<button class="nav-item ${state.selectedView === 'class' && state.selectedClass === cls.id ? 'active' : ''}" data-class="${escapeHtml(cls.id)}"><span class="class-dot" style="--dot:${escapeHtml(cls.color)}"></span><span>${escapeHtml(cls.name)}</span></button>`).join('')}<button class="nav-item ${state.selectedView === 'archive' ? 'active' : ''}" data-view="archive"><span class="nav-icon">▤</span>Archive${state.classes.some(cls => cls.archived) ? ` (${state.classes.filter(cls => cls.archived).length})` : ''}</button>`;
+      const level = Math.floor((state.xp || 0) / 100) + 1;
+      const inLevel = (state.xp || 0) % 100;
+      document.getElementById('levelLabel').textContent = `LV ${level}`;
+      document.getElementById('xpLabel').textContent = `${inLevel} / 100 XP`;
+      document.getElementById('xpFill').style.width = `${inLevel}%`;
+      document.getElementById('buddyName').textContent = level > 4 ? 'Pip is thriving' : level > 1 ? 'Pip is growing' : 'Pip is your study buddy';
+      document.getElementById('buddyMood').textContent = state.sessions?.length ? 'Nice work showing up' : 'Ready when you are';
+    }
+    function renderToday() {
+      const tasks = allTasks();
+      const activeClasses = state.classes.filter(cls => !cls.archived);
+      const completed = tasks.filter(task => task.done).length;
+      const total = tasks.length;
+      const todaySessions = (state.sessions || []).filter(session => session.date === todayKey()).length;
+      const week = weekActivity();
+      const remaining = tasks.filter(task => !task.done);
+      const visibleTasks = remaining.slice(0, 6);
+      const empty = total === 0 ? `<div class="empty-state"><strong>Your page is yours to shape.</strong>Add a class, then make units and study tasks to get started.</div>` : visibleTasks.length === 0 ? `<div class="empty-state"><strong>All caught up.</strong>You cleared every task. Add a new one or take a well-earned break.</div>` : '';
+      document.getElementById('pageContent').innerHTML = `
+        <section class="greeting-row"><div><div class="eyebrow">A little progress goes a long way</div><h1>Let's make today count.</h1><p class="greeting-sub">One small step at a time. Pip's right here with you.</p><a class="secondary-button" style="display:inline-flex;margin-top:12px" href="https://coursesite.lehigh.edu/my/" target="_blank" rel="noopener noreferrer">↗ &nbsp;Lehigh CourseSite</a></div><button class="primary-button" data-action="quick-task"><span>＋</span> Add a task</button></section>
+        <section class="overview-grid">
+          <div class="focus-card"><div class="focus-copy"><div class="eyebrow">Your next little win</div><h2>${remaining.length ? escapeHtml(remaining[0].title) : 'Make room for a fresh start'}</h2><p>${remaining.length ? `${escapeHtml(remaining[0].className)} · ${escapeHtml(remaining[0].unitName)}. You don't have to do it all, just begin.` : 'Add a task to your study list, then settle in for a focused session.'}</p><button class="primary-button" data-action="start-focus">◷ &nbsp;Start focusing</button></div><div class="focus-art"><span class="art-spark one">✦</span><canvas class="pixel-buddy" id="heroBuddy" width="16" height="16" aria-label="Pip the pixel companion"></canvas><span class="art-spark two">✧</span></div></div>
+          <div class="stats-card"><div><div class="stats-title">Tasks checked off</div><div class="stats-number">${completed}<span style="font-size:15px;color:#a2a59b"> / ${total}</span></div><div class="stats-sub">${todaySessions ? `${todaySessions} focus session${todaySessions === 1 ? '' : 's'} today` : 'Every checkmark counts'}</div></div><hr class="stats-divider"><div class="week-row">${week.map((day, index) => `<div class="day-mark ${day ? 'done' : ''}"><b></b>${DAY_NAMES[index]}</div>`).join('')}</div></div>
+        </section>
+        <section class="task-section"><div class="section-heading"><div><h2>Up next</h2><p>A short list is a good list.</p></div><div class="progress-text">${remaining.length} LEFT</div></div><div class="task-list">${visibleTasks.map(taskRow).join('')}${empty}</div></section>
+        <section><div class="section-heading"><div><h2>Your classes</h2><p>Pick up right where you left off.</p></div><button class="quiet-button" id="addClassLink">＋ New class</button></div><div class="class-quick-list">${activeClasses.length ? activeClasses.map(cls => `<button class="resource-link" style="display:flex;width:100%;margin-bottom:7px;text-align:left" data-class="${escapeHtml(cls.id)}"><span style="display:flex;align-items:center;gap:9px"><i class="class-dot" style="--dot:${escapeHtml(cls.color)}"></i>${escapeHtml(cls.name)}</span><span style="color:#9aa097">${cls.units.length} unit${cls.units.length === 1 ? '' : 's'} →</span></button>`).join('') : `<div class="empty-state"><strong>No active classes.</strong>Create your first class to start building your study space.</div>`}</div></section>`;
+      const hero = document.getElementById('heroBuddy'); if (hero) drawBuddy(hero, state.xp || 0);
+    }
+    function taskRow(task) {
+      return `<div class="task-row ${task.done ? 'completed' : ''}"><button class="check-button" data-task-toggle="${escapeHtml(task.id)}" aria-label="${task.done ? 'Mark incomplete' : 'Complete task'}">${task.done ? '✓' : ''}</button><div class="task-info"><span class="task-title">${escapeHtml(task.title)}</span><span class="task-meta"><span style="color:${escapeHtml(task.classColor)}">■</span> ${escapeHtml(task.className)} · ${escapeHtml(task.unitName)}</span></div><span class="task-xp">+10 XP</span></div>`;
+    }
+    function localDateKey(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
+    function eventOccursOn(event, dateKey) {
+      if (dateKey < event.date) return false;
+      if (!event.repeat || event.repeat === 'none') return dateKey === event.date;
+      const occurrence = new Date(`${dateKey}T12:00:00`);
+      const start = new Date(`${event.date}T12:00:00`);
+      if (event.repeat === 'daily') return true;
+      if (event.repeat === 'weekly') return occurrence.getDay() === start.getDay();
+      if (event.repeat === 'monthly') return occurrence.getDate() === start.getDate();
+      return dateKey === event.date;
+    }
+    function eventIsComplete(event, dateKey) { return (event.completedDates || []).includes(dateKey); }
+    function periodKey(cadence) {
+      const now = new Date();
+      if (cadence === 'daily') return `daily:${todayKey()}`;
+      if (cadence === 'monthly') return `monthly:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+      return `weekly:${localDateKey(monday)}`;
+    }
+    function renderRoutines() {
+      const period = periodKey(routineCadence);
+      const tasks = (state.routines || []).filter(task => task.cadence === routineCadence);
+      const completed = tasks.filter(task => task.completedPeriod === period).length;
+      document.getElementById('pageContent').innerHTML = `<section class="page-head"><div><div class="eyebrow">Little habits, steady progress</div><h1>Task lists</h1><p class="greeting-sub">Check in on the things you want to keep doing.</p></div><button class="primary-button" data-action="add-routine"><span>＋</span> Add task</button></section><div class="section-heading"><div class="segmented-control" role="tablist" aria-label="Task frequency"><button class="segment-button ${routineCadence === 'daily' ? 'active' : ''}" data-cadence="daily" role="tab" aria-selected="${routineCadence === 'daily'}">Daily</button><button class="segment-button ${routineCadence === 'weekly' ? 'active' : ''}" data-cadence="weekly" role="tab" aria-selected="${routineCadence === 'weekly'}">Weekly</button><button class="segment-button ${routineCadence === 'monthly' ? 'active' : ''}" data-cadence="monthly" role="tab" aria-selected="${routineCadence === 'monthly'}">Monthly</button></div><span class="progress-text">${completed} / ${tasks.length} DONE</span></div><div class="routine-list">${tasks.length ? tasks.map(task => `<div class="routine-row ${task.completedPeriod === period ? 'completed' : ''}"><button class="check-button" data-routine-toggle="${escapeHtml(task.id)}" aria-label="${task.completedPeriod === period ? 'Mark incomplete' : 'Complete task'}">${task.completedPeriod === period ? '✓' : ''}</button><span class="routine-title">${escapeHtml(task.title)}</span><div class="routine-actions"><button class="icon-button" data-edit-routine="${escapeHtml(task.id)}" title="Edit task" aria-label="Edit task">✎</button><button class="icon-button" data-delete-routine="${escapeHtml(task.id)}" title="Delete task" aria-label="Delete task">×</button></div></div>`).join('') : `<div class="empty-state"><strong>Your ${routineCadence} list is ready.</strong>Add a task you want to remember ${routineCadence === 'daily' ? 'each day' : routineCadence === 'weekly' ? 'each week' : 'each month'}.</div>`}</div>`;
+    }
+    function renderCalendar() {
+      if (!selectedCalendarDate) selectedCalendarDate = todayKey();
+      const year = calendarCursor.getFullYear();
+      const month = calendarCursor.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const offset = (firstDay.getDay() + 6) % 7;
+      const dayCount = new Date(year, month + 1, 0).getDate();
+      const monthName = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(firstDay);
+      const eventDates = new Set((state.events || []).map(event => event.date));
+      const blanks = Array.from({ length: offset }, () => '<div class="calendar-cell"></div>').join('');
+      const days = Array.from({ length: dayCount }, (_, index) => {
+        const day = index + 1;
+        const dateKey = localDateKey(new Date(year, month, day));
+        const count = (state.events || []).filter(event => eventOccursOn(event, dateKey)).length;
+        return `<div class="calendar-cell"><button class="calendar-day-button ${dateKey === selectedCalendarDate ? 'selected' : ''} ${dateKey === todayKey() ? 'today' : ''}" data-select-date="${dateKey}" aria-label="${dateKey}${count ? `, ${count} event${count === 1 ? '' : 's'}` : ''}">${day}<span class="calendar-dots">${Array.from({ length: Math.min(count, 3) }, () => '<i></i>').join('')}</span></button></div>`;
+      }).join('');
+      const selectedEvents = (state.events || []).filter(event => eventOccursOn(event, selectedCalendarDate)).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      const selectedLabel = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(`${selectedCalendarDate}T12:00:00`));
+      const eventCards = selectedEvents.map(event => `<article class="event-card"><div class="event-card-head"><div><strong>${escapeHtml(event.title)}</strong>${event.className ? `<div class="event-time">${escapeHtml(event.className)}</div>` : ''}${event.time ? `<div class="event-time">${escapeHtml(event.time)}</div>` : '<div class="event-time">All day</div>'}</div><div><button class="icon-button" data-edit-event="${escapeHtml(event.id)}" aria-label="Edit event" title="Edit event">✎</button><button class="icon-button" data-delete-event="${escapeHtml(event.id)}" aria-label="Delete event" title="Delete event">×</button></div></div>${event.details ? `<p>${escapeHtml(event.details)}</p>` : ''}<div class="event-links"><a href="${escapeHtml(googleCalendarUrl(event))}" target="_blank" rel="noopener noreferrer">Add to Google Calendar ↗</a></div></article>`).join('');
+      document.getElementById('pageContent').innerHTML = `<section class="page-head"><div><div class="eyebrow">Tests, deadlines, and important dates</div><h1>Calendar</h1><p class="greeting-sub">Plan it here, then send events to Google Calendar whenever you like.</p></div><button class="primary-button" data-action="add-event"><span>＋</span> Add event</button></section><section class="calendar-layout"><div class="calendar-panel"><div class="calendar-toolbar"><div class="calendar-month-controls"><button class="icon-button" data-month-shift="-1" aria-label="Previous month" title="Previous month">←</button><button class="icon-button" data-month-shift="1" aria-label="Next month" title="Next month">→</button><h2>${escapeHtml(monthName)}</h2></div><button class="secondary-button" data-action="export-calendar">↓ .ics</button></div><div class="month-grid">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => `<div class="calendar-weekday">${day}</div>`).join('')}${blanks}${days}</div></div><aside class="calendar-events"><h2>${selectedEvents.length ? 'On your calendar' : 'A clear day'}</h2><div class="calendar-events-date">${escapeHtml(selectedLabel)}</div><div class="event-list">${eventCards || '<div class="empty-state"><strong>Nothing planned yet.</strong>Add a test, due date, or reminder for this day.</div>'}</div><button class="secondary-button" style="margin-top:12px" data-action="add-event">＋ Add event</button></aside></section>`;
+    }
+    function renderPlanner() {
+      renderCalendar();
+      decorateCalendarEvents();
+      const calendarLayout = document.querySelector('.calendar-layout')?.outerHTML || '';
+      renderRoutines();
+      decorateRoutineAssignments();
+      const listHeading = document.querySelector('.section-heading')?.outerHTML || '';
+      const routineList = document.querySelector('.routine-list')?.outerHTML || '';
+      document.getElementById('pageContent').innerHTML = `<section class="page-head"><div><div class="eyebrow">One place to plan your next steps</div><h1>Study planner</h1><p class="greeting-sub">See your dates and study lists together. Add a class task to the calendar whenever you need to.</p></div><div class="class-page-actions"><button class="secondary-button" data-action="add-routine">＋ Add task</button><button class="primary-button" data-action="add-event"><span>＋</span> Add event</button></div></section><section class="planner-layout"><div class="planner-calendar">${calendarLayout}</div><aside class="planner-task-panel"><div class="section-heading"><div><h2>${routineCadence[0].toUpperCase()}${routineCadence.slice(1)} tasks</h2><p>Class assignments and personal reminders.</p></div></div>${listHeading}${routineList}</aside></section>`;
+    }
+    function decorateCollapsibleUnits() {
+      state.collapsedUnits ||= [];
+      state.collapsedUnitSections ||= [];
+      document.querySelectorAll('.unit-card').forEach(card => {
+        const header = card.querySelector('.unit-header');
+        const title = header?.querySelector('.unit-title-wrap');
+        const actions = header?.querySelector('.unit-actions');
+        const body = card.querySelector('.unit-body');
+        const unitId = actions?.querySelector('[data-edit-unit]')?.dataset.editUnit;
+        if (!header || !title || !actions || !body || !unitId) return;
+
+        const summary = document.createElement('summary');
+        summary.className = 'unit-header';
+        summary.append(title);
+        const unit = document.createElement('details');
+        unit.className = 'unit-card';
+        unit.open = !state.collapsedUnits.includes(unitId);
+        unit.addEventListener('toggle', () => {
+          state.collapsedUnits = unit.open ? state.collapsedUnits.filter(id => id !== unitId) : [...new Set([...state.collapsedUnits, unitId])];
+          saveState();
+        });
+        card.replaceWith(unit);
+        unit.append(summary, actions, body);
+
+        [...body.children].forEach((column, index) => {
+          const heading = column.querySelector('.unit-subhead');
+          if (!heading) return;
+          const key = `${unitId}:${index}`;
+          const group = document.createElement('details');
+          group.className = 'unit-content-group';
+          group.open = !state.collapsedUnitSections.includes(key);
+          group.addEventListener('toggle', () => {
+            state.collapsedUnitSections = group.open ? state.collapsedUnitSections.filter(item => item !== key) : [...new Set([...state.collapsedUnitSections, key])];
+            saveState();
+          });
+          const sectionSummary = document.createElement('summary');
+          sectionSummary.className = 'unit-subhead';
+          sectionSummary.textContent = heading.textContent;
+          const contents = [...column.children].filter(child => child !== heading);
+          column.replaceChildren(group);
+          group.append(sectionSummary, ...contents);
+        });
+      });
+    }
+    function decorateClassTaskActions() {
+      document.querySelectorAll('.unit-task').forEach(row => {
+        const toggle = row.querySelector('[data-task-toggle]');
+        const found = toggle && findTask(toggle.dataset.taskToggle);
+        if (!found) return;
+        const assign = document.createElement('button');
+        assign.type = 'button'; assign.className = 'icon-button'; assign.dataset.assignTask = found.task.id;
+        assign.title = found.task.listCadence ? `In ${found.task.listCadence} list; change assignment` : 'Assign to a task list';
+        assign.setAttribute('aria-label', assign.title); assign.textContent = found.task.listCadence ? '☷' : '＋';
+        row.insertBefore(assign, row.querySelector('[data-edit-task]'));
+        const schedule = document.createElement('button');
+        schedule.type = 'button'; schedule.className = 'icon-button'; schedule.dataset.scheduleTask = found.task.id;
+        schedule.title = 'Add to calendar'; schedule.setAttribute('aria-label', schedule.title); schedule.textContent = '▦';
+        row.insertBefore(schedule, row.querySelector('[data-edit-task]'));
+      });
+    }
+    function decorateRoutineAssignments() {
+      const list = document.querySelector('.routine-list');
+      if (!list) return;
+      const period = periodKey(routineCadence);
+      const routines = (state.routines || []).filter(task => task.cadence === routineCadence);
+      const assigned = allTasks().filter(task => task.listCadence === routineCadence);
+      list.querySelector('.empty-state')?.remove();
+      list.querySelectorAll('.routine-row').forEach(row => {
+        const taskButton = row.querySelector('[data-routine-toggle]');
+        const task = taskButton && routines.find(item => item.id === taskButton.dataset.routineToggle);
+        if (!task) return;
+        const schedule = document.createElement('button');
+        schedule.type = 'button'; schedule.className = 'icon-button'; schedule.dataset.scheduleRoutine = task.id;
+        schedule.title = 'Add to calendar'; schedule.setAttribute('aria-label', schedule.title); schedule.textContent = '▦';
+        row.querySelector('.routine-actions')?.prepend(schedule);
+      });
+      assigned.forEach(task => {
+        const row = document.createElement('div');
+        row.className = `routine-row ${task.done ? 'completed' : ''}`;
+        row.innerHTML = `<button class="check-button" data-task-toggle="${escapeHtml(task.id)}" aria-label="${task.done ? 'Mark incomplete' : 'Complete task'}">${task.done ? '✓' : ''}</button><div><span class="routine-title">${escapeHtml(task.title)}</span><span class="task-meta">${escapeHtml(task.className)} · ${escapeHtml(task.unitName)}</span></div><div class="routine-actions"><button class="icon-button" data-schedule-task="${escapeHtml(task.id)}" title="Add to calendar" aria-label="Add to calendar">▦</button><button class="icon-button" data-edit-task="${escapeHtml(task.id)}" title="Edit in class" aria-label="Edit in class">✎</button></div>`;
+        list.append(row);
+      });
+      const completed = routines.filter(task => task.completedPeriod === period).length + assigned.filter(task => task.done).length;
+      const total = routines.length + assigned.length;
+      const progress = document.querySelector('.progress-text');
+      if (progress) progress.textContent = `${completed} / ${total} DONE`;
+    }
+    function askTaskListAssignment(taskId) {
+      const found = findTask(taskId); if (!found) return;
+      openForm({ title: 'Add class task to a list', fields: [{ name: 'cadence', label: 'Show this task in', type: 'select', value: found.task.listCadence || 'none', options: [{ value: 'none', label: 'Not on a recurring list' }, { value: 'daily', label: 'Daily tasks' }, { value: 'weekly', label: 'Weekly tasks' }, { value: 'monthly', label: 'Monthly tasks' }] }], onSubmit: data => {
+        found.task.listCadence = data.cadence === 'none' ? '' : data.cadence;
+        saveState(); render(); showToast(data.cadence === 'none' ? 'Task removed from its list.' : `Added to your ${data.cadence} tasks.`);
+      } });
+    }
+    function scheduleTask(taskId) {
+      const found = findTask(taskId); if (!found) return;
+      askEvent(null, { title: found.task.title, className: found.cls.name, date: selectedCalendarDate || todayKey() });
+    }
+    function scheduleRoutine(taskId) {
+      const task = (state.routines || []).find(item => item.id === taskId); if (!task) return;
+      askEvent(null, { title: task.title, date: selectedCalendarDate || todayKey() });
+    }
+    function googleCalendarUrl(event, occurrenceDate = event.date) {
+      let dates;
+      if (event.time) {
+        const start = new Date(`${occurrenceDate}T${event.time}`);
+        const end = new Date(start.getTime() + 60 * 60 * 1000);
+        const format = date => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+        dates = `${format(start)}/${format(end)}`;
+      } else {
+        const end = new Date(`${occurrenceDate}T12:00:00`);
+        end.setDate(end.getDate() + 1);
+        dates = `${occurrenceDate.replace(/-/g, '')}/${localDateKey(end).replace(/-/g, '')}`;
+      }
+      const details = [event.className, event.details].filter(Boolean).join('\n');
+      const params = new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates, details });
+      if (event.repeat && event.repeat !== 'none') params.set('recur', `RRULE:FREQ=${event.repeat.toUpperCase()}`);
+      return `https://calendar.google.com/calendar/render?${params}`;
+    }
+    function decorateCalendarEvents() {
+      const events = (state.events || []).filter(event => eventOccursOn(event, selectedCalendarDate)).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      document.querySelectorAll('.event-card').forEach((card, index) => {
+        const event = events[index]; if (!event) return;
+        const completed = eventIsComplete(event, selectedCalendarDate);
+        card.classList.toggle('completed', completed);
+        const title = card.querySelector('.event-card-head strong');
+        if (title) title.classList.add('event-title');
+        const googleLink = card.querySelector('.event-links a');
+        if (googleLink) googleLink.href = googleCalendarUrl(event, selectedCalendarDate);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.eventComplete = event.id;
+        button.dataset.eventDate = selectedCalendarDate;
+        button.setAttribute('aria-pressed', String(completed));
+        button.textContent = completed ? '✓ Done' : '□ Mark done';
+        card.querySelector('.event-links')?.append(button);
+      });
+    }
+    function renderArchive() {
+      const archived = state.classes.filter(cls => cls.archived);
+      document.getElementById('pageContent').innerHTML = `<section class="page-head"><div><div class="eyebrow">Keep past semesters close</div><h1>Class archive</h1><p class="greeting-sub">Archived classes keep their units, tasks, and links. Restore one any time.</p></div></section><section class="archive-list">${archived.length ? archived.map(cls => {
+        const unitCount = cls.units.length;
+        const taskCount = cls.units.reduce((sum, unit) => sum + unit.tasks.length, 0);
+        return `<article class="archive-row"><div class="archive-row-main"><i class="class-dot" style="--dot:${escapeHtml(cls.color)}"></i><div><strong>${escapeHtml(cls.name)}</strong><span>${unitCount} unit${unitCount === 1 ? '' : 's'} · ${taskCount} task${taskCount === 1 ? '' : 's'}</span></div></div><div class="archive-row-actions"><button class="secondary-button" data-restore-class="${escapeHtml(cls.id)}">Restore</button><button class="icon-button" data-delete-archived="${escapeHtml(cls.id)}" aria-label="Delete archived class" title="Delete permanently">×</button></div></article>`;
+      }).join('') : '<div class="empty-state"><strong>No archived classes.</strong>When a semester ends, archive a class from its page and it will be kept here.</div>'}</section>`;
+    }
+    function askRoutineTask(cadence, task = null) {
+      openForm({ title: task ? 'Edit list task' : `Add a ${cadence} task`, fields: [{ name: 'title', label: 'What do you want to remember?', value: task?.title || '', placeholder: 'e.g. Review flashcards' }], onSubmit: data => {
+        if (task) task.title = data.title.trim();
+        else state.routines.push({ id: makeId(), title: data.title.trim(), cadence, completedPeriod: '', rewardedPeriods: [] });
+        saveState(); render(); showToast(task ? 'Task updated.' : 'Task added to your list.');
+      } });
+    }
+    function toggleRoutine(taskId) {
+      const task = (state.routines || []).find(item => item.id === taskId); if (!task) return;
+      const period = periodKey(task.cadence);
+      if (task.completedPeriod === period) task.completedPeriod = '';
+      else {
+        task.completedPeriod = period;
+        task.rewardedPeriods ||= [];
+        if (!task.rewardedPeriods.includes(period)) {
+          task.rewardedPeriods.push(period); state.xp += 5; updateStreak(todayKey()); showToast('Nice steady progress! +5 XP');
+        }
+      }
+      saveState(); render();
+    }
+    function archiveClass(classId) {
+      const cls = state.classes.find(item => item.id === classId); if (!cls) return;
+      cls.archived = true; state.selectedView = 'archive'; state.selectedClass = null; saveState(); render(); showToast(`${cls.name} moved to your archive.`);
+    }
+    function restoreClass(classId) {
+      const cls = state.classes.find(item => item.id === classId); if (!cls) return;
+      cls.archived = false; saveState(); render(); showToast(`${cls.name} restored to My classes.`);
+    }
+    function askEvent(event = null, defaults = {}) {
+      const values = event || defaults;
+      openForm({ title: event ? 'Edit calendar event' : 'Add a calendar event', fields: [
+        { name: 'title', label: 'Event', value: values.title || '', placeholder: 'e.g. Biology midterm' },
+        { name: 'className', label: 'Class or course (optional)', value: values.className || '', placeholder: 'e.g. Biology', required: false },
+        { name: 'date', label: 'Date', type: 'date', value: values.date || selectedCalendarDate || todayKey() },
+        { name: 'time', label: 'Time (optional)', type: 'time', value: values.time || '', required: false },
+        { name: 'repeat', label: 'Repeat', type: 'select', value: values.repeat || 'none', options: [{ value: 'none', label: 'Does not repeat' }, { value: 'daily', label: 'Every day' }, { value: 'weekly', label: 'Every week' }, { value: 'monthly', label: 'Every month' }] },
+        { name: 'details', label: 'Notes (optional)', type: 'textarea', value: values.details || '', placeholder: 'Room, what to bring, or a reminder', required: false }
+      ], deleteAction: event ? () => deleteEvent(event.id) : null, onSubmit: data => {
+        const value = { title: data.title.trim(), className: data.className.trim(), date: data.date, time: data.time, repeat: data.repeat, details: data.details.trim() };
+        if (event) Object.assign(event, value);
+        else state.events.push({ id: makeId(), ...value });
+        selectedCalendarDate = value.date; calendarCursor = new Date(`${value.date}T12:00:00`); calendarCursor.setDate(1);
+        saveState(); render(); showToast(event ? 'Calendar event updated.' : 'Event added to your calendar.');
+      } });
+    }
+    function deleteEvent(eventId) {
+      if (!confirm('Delete this calendar event?')) return;
+      state.events = state.events.filter(event => event.id !== eventId); saveState(); render(); showToast('Event deleted.');
+    }
+    function toggleEventCompletion(eventId, dateKey) {
+      const event = state.events.find(item => item.id === eventId); if (!event) return;
+      event.completedDates ||= [];
+      event.rewardedDates ||= [];
+      if (event.completedDates.includes(dateKey)) event.completedDates = event.completedDates.filter(date => date !== dateKey);
+      else {
+        event.completedDates.push(dateKey);
+        if (!event.rewardedDates.includes(dateKey)) {
+          event.rewardedDates.push(dateKey); state.xp += 5; updateStreak(dateKey); showToast('Event checked off! +5 XP');
+        }
+      }
+      saveState(); render();
+    }
+    function downloadCalendar() {
+      if (!state.events.length) { showToast('Add an event before exporting your calendar.'); return; }
+      const escapeIcs = value => String(value || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+      const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Study Sprout//Calendar//EN', 'CALSCALE:GREGORIAN'];
+      state.events.forEach(event => {
+        lines.push('BEGIN:VEVENT', `UID:${event.id}@study-sprout.local`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}`);
+        if (event.time) {
+          const start = new Date(`${event.date}T${event.time}`);
+          const end = new Date(start.getTime() + 60 * 60 * 1000);
+          const format = date => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+          lines.push(`DTSTART:${format(start)}`, `DTEND:${format(end)}`);
+        } else {
+          const end = new Date(`${event.date}T12:00:00`); end.setDate(end.getDate() + 1);
+          lines.push(`DTSTART;VALUE=DATE:${event.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${localDateKey(end).replace(/-/g, '')}`);
+        }
+        if (event.repeat && event.repeat !== 'none') lines.push(`RRULE:FREQ=${event.repeat.toUpperCase()}`);
+        lines.push(`SUMMARY:${escapeIcs(event.title)}`);
+        const description = [event.className, event.details].filter(Boolean).join('\n');
+        if (description) lines.push(`DESCRIPTION:${escapeIcs(description)}`);
+        lines.push('END:VEVENT');
+      });
+      lines.push('END:VCALENDAR');
+      const url = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' }));
+      const link = document.createElement('a'); link.href = url; link.download = 'study-sprout-calendar.ics'; link.click();
+      URL.revokeObjectURL(url); showToast('Calendar file downloaded.');
+    }
+    function renderClass() {
+      const cls = state.classes.find(item => item.id === state.selectedClass && !item.archived);
+      if (!cls) { state.selectedView = 'today'; state.selectedClass = null; renderToday(); return; }
+      const units = cls.units.map((unit, index) => `<article class="unit-card"><header class="unit-header"><div class="unit-title-wrap"><span class="unit-number">${String(index + 1).padStart(2, '0')}</span><span class="unit-title">${escapeHtml(unit.name)}</span></div><div class="unit-actions"><button class="icon-button" data-edit-unit="${escapeHtml(unit.id)}" title="Edit unit" aria-label="Edit unit">✎</button><button class="icon-button" data-delete-unit="${escapeHtml(unit.id)}" title="Delete unit" aria-label="Delete unit">×</button></div></header><div class="unit-body"><div><h3 class="unit-subhead">Study tasks</h3>${unit.tasks.map(task => `<div class="unit-task"><button class="check-button" data-task-toggle="${escapeHtml(task.id)}" aria-label="${task.done ? 'Mark incomplete' : 'Complete task'}">${task.done ? '✓' : ''}</button><span class="task-title" style="${task.done ? 'text-decoration:line-through;color:#93988f' : ''}">${escapeHtml(task.title)}</span><button class="icon-button" data-edit-task="${escapeHtml(task.id)}" title="Edit task" aria-label="Edit task">✎</button><button class="icon-button" data-delete-task="${escapeHtml(task.id)}" title="Delete task" aria-label="Delete task">×</button></div>`).join('')}<button class="inline-add" data-add-task="${escapeHtml(unit.id)}">＋ Add study task</button></div><div><h3 class="unit-subhead">Practice & reference</h3><div class="link-list">${unit.links.map(link => `<div class="resource-link"><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">↗ &nbsp;${escapeHtml(link.title)}</a><div class="resource-link-actions"><button class="icon-button" data-edit-link="${escapeHtml(link.id)}" aria-label="Edit link" title="Edit link">✎</button><button class="icon-button" data-delete-link="${escapeHtml(link.id)}" aria-label="Delete link" title="Delete link">×</button></div></div>`).join('')}</div><button class="inline-add" data-add-link="${escapeHtml(unit.id)}">＋ Add a link</button></div></div></article>`).join('');
+      const taskCount = cls.units.reduce((sum, unit) => sum + unit.tasks.length, 0);
+      document.getElementById('pageContent').innerHTML = `<section class="page-head"><div><div class="eyebrow">Your class space</div><h1 style="display:flex;align-items:center;gap:11px"><i class="class-dot" style="--dot:${escapeHtml(cls.color)};width:14px;height:14px"></i>${escapeHtml(cls.name)}</h1><p class="greeting-sub">${cls.units.length} unit${cls.units.length === 1 ? '' : 's'} · ${taskCount} study task${taskCount === 1 ? '' : 's'}</p></div><div class="class-page-actions"><button class="secondary-button" data-edit-class="${escapeHtml(cls.id)}">✎ Edit class</button><button class="secondary-button" data-archive-class="${escapeHtml(cls.id)}">▤ Archive</button><button class="primary-button" data-add-unit="${escapeHtml(cls.id)}"><span>＋</span> Add unit</button></div></section><section class="unit-list">${units.length ? units : `<div class="empty-state"><strong>A fresh page.</strong>Add a unit to organize your topics, tasks, and useful links.</div>`}</section>`;
+      const notes = (cls.lectureNotes || []).slice().sort((first, second) => second.date.localeCompare(first.date));
+      document.getElementById('pageContent').innerHTML += `<section class="lecture-notes-section"><div class="section-heading"><div><h2>Lecture notes</h2><p>Keep track of what clicked, what to review, and what to ask next.</p></div><button class="primary-button" data-add-lecture-note="${escapeHtml(cls.id)}"><span>＋</span> Add notes</button></div><div class="lecture-note-list">${notes.length ? notes.map(note => `<article class="lecture-note-card"><div class="lecture-note-header"><strong class="lecture-note-date">${escapeHtml(new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(`${note.date}T12:00:00`)))}</strong><div class="lecture-note-actions"><button class="icon-button" data-edit-lecture-note="${escapeHtml(note.id)}" aria-label="Edit lecture notes" title="Edit notes">✎</button><button class="icon-button" data-delete-lecture-note="${escapeHtml(note.id)}" aria-label="Delete lecture notes" title="Delete notes">×</button></div></div><div class="lecture-note-fields"><div class="lecture-note-field"><strong>What we covered</strong><p>${escapeHtml(note.covered || 'Not noted')}</p></div><div class="lecture-note-field"><strong>Focus on</strong><p>${escapeHtml(note.focus || 'Not noted')}</p></div><div class="lecture-note-field"><strong>Still unclear</strong><p>${escapeHtml(note.unclear || 'Not noted')}</p></div></div></article>`).join('') : '<div class="empty-state"><strong>No lecture notes yet.</strong>Add a dated entry after class to capture what you learned and what to revisit.</div>'}</div></section>`;
+    }
+    function askLectureNote(classId, note = null) {
+      const cls = state.classes.find(item => item.id === classId); if (!cls) return;
+      openForm({ title: note ? 'Edit lecture notes' : 'Add lecture notes', fields: [
+        { name: 'date', label: 'Lecture date', type: 'date', value: note?.date || todayKey() },
+        { name: 'covered', label: 'What did you cover in lecture?', type: 'textarea', value: note?.covered || '', placeholder: 'Topics, examples, or key ideas', required: false },
+        { name: 'focus', label: 'What should you focus on?', type: 'textarea', value: note?.focus || '', placeholder: 'What needs another look?', required: false },
+        { name: 'unclear', label: 'What is still unclear?', type: 'textarea', value: note?.unclear || '', placeholder: 'Questions to bring to office hours', required: false }
+      ], deleteAction: note ? () => deleteLectureNote(classId, note.id) : null, onSubmit: data => {
+        cls.lectureNotes ||= [];
+        const entry = { date: data.date, covered: data.covered.trim(), focus: data.focus.trim(), unclear: data.unclear.trim() };
+        if (note) Object.assign(note, entry); else cls.lectureNotes.push({ id: makeId(), ...entry });
+        saveState(); render(); showToast(note ? 'Lecture notes updated.' : 'Lecture notes saved.');
+      } });
+    }
+    function deleteLectureNote(classId, noteId) {
+      const cls = state.classes.find(item => item.id === classId); if (!cls) return;
+      if (!confirm('Delete these lecture notes?')) return;
+      cls.lectureNotes = (cls.lectureNotes || []).filter(note => note.id !== noteId);
+      saveState(); render(); showToast('Lecture notes deleted.');
+    }
+    function renderFocus() {
+      const tasks = allTasks().filter(task => !task.done);
+      const options = tasks.length ? tasks.map(task => `<option value="${escapeHtml(task.id)}">${escapeHtml(task.className)} · ${escapeHtml(task.title)}</option>`).join('') : '<option value="">No open tasks yet</option>';
+      document.getElementById('pageContent').innerHTML = `<section class="page-head"><div><div class="eyebrow">A calm place to begin</div><h1>Focus room</h1><p class="greeting-sub">Pick one thing. Give it your attention. That's enough.</p></div></section><section class="focus-panel"><div class="timer-card"><div class="eyebrow">${timerMode === 'focus' ? 'Focus session' : 'Rest break'}</div><div class="timer-face" id="timerFace">${formatTime(timerSeconds)}</div><div class="timer-status" id="timerStatus">${timerRunning ? 'You are doing great. Stay with this moment.' : 'Ready when you are.'}</div><div class="timer-controls"><button class="primary-button" id="timerToggle">${timerRunning ? 'Ⅱ &nbsp;Pause' : '▶ &nbsp;Begin session'}</button><button class="secondary-button" id="timerReset">↺ &nbsp;Reset</button></div><div class="timer-settings"><span>Session length</span><select id="timerLength" aria-label="Session length"><option value="15">15 min</option><option value="25" selected>25 min</option><option value="45">45 min</option><option value="60">60 min</option></select><button class="quiet-button" id="breakMode">Take a 5 min break</button></div></div><aside class="focus-side-card"><div style="display:flex;align-items:center;gap:11px"><canvas class="pixel-buddy" id="focusBuddy" width="16" height="16" aria-label="Pip the pixel companion"></canvas><div><div class="eyebrow">Pip says</div><strong style="font-size:13px">Just start small.</strong></div></div><p class="focus-note">You don't need to feel ready. Make the next step tiny, and let momentum meet you there.</p><div style="margin-top:20px"><label class="select-label" for="focusTask">What are you working on?</label><select class="focus-select" id="focusTask">${options}</select></div><div class="focus-note" style="margin-top:10px">Finishing a focus session earns <strong>20 XP</strong>. Completing tasks earns <strong>10 XP</strong>.</div></aside></section>`;
+      const buddy = document.getElementById('focusBuddy'); if (buddy) drawBuddy(buddy, state.xp || 0);
+      const timerLength = document.getElementById('timerLength');
+      timerLength.innerHTML = [15, 25, 45, 60, 75, 90, 120, 150, 180].map(minutes => `<option value="${minutes}">${minutes} min</option>`).join('');
+      timerLength.value = String(timerSessionMinutes);
+      timerLength.disabled = timerRunning;
+      updateTimerDisplay();
+    }
+    function formatTime(seconds) { return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
+    function updateTimerDisplay() {
+      const face = document.getElementById('timerFace'); if (face) face.textContent = formatTime(timerSeconds);
+      const toggle = document.getElementById('timerToggle'); if (toggle) toggle.innerHTML = timerRunning ? 'Ⅱ &nbsp;Pause' : '▶ &nbsp;Begin session';
+      const length = document.getElementById('timerLength'); if (length) length.disabled = timerRunning;
+      const status = document.getElementById('timerStatus'); if (status && !timerRunning) status.textContent = timerMode === 'break' ? 'A little rest helps the ideas settle.' : 'Ready when you are.';
+    }
+    function startTimer() {
+      if (timerRunning) { timerRunning = false; clearInterval(timerInterval); timerInterval = null; updateTimerDisplay(); return; }
+      timerRunning = true;
+      timerInterval = setInterval(() => {
+        timerSeconds -= 1;
+        if (timerSeconds <= 0) { clearInterval(timerInterval); timerInterval = null; timerRunning = false; timerFinished(); }
+        updateTimerDisplay();
+      }, 1000);
+      updateTimerDisplay();
+    }
+    function timerFinished() {
+      if (timerMode === 'focus') {
+        const date = todayKey();
+        state.sessions.push({ date, minutes: timerSessionMinutes });
+        state.xp += 20;
+        updateStreak(date);
+        saveState();
+        showToast('Focus session complete! +20 XP for you and Pip.');
+        timerMode = 'break'; timerSeconds = 5 * 60;
+      } else { timerMode = 'focus'; timerSeconds = timerSessionMinutes * 60; showToast('Break complete. Ready for another?'); }
+      render();
+    }
+    function updateStreak(date) {
+      const previous = state.lastStudyDate;
+      if (previous !== date) {
+        const yesterday = new Date(`${date}T00:00:00`); yesterday.setDate(yesterday.getDate() - 1);
+        state.streak = previous === yesterday.toISOString().slice(0, 10) ? (state.streak || 0) + 1 : 1;
+        state.lastStudyDate = date;
+      }
+    }
+    function weekActivity() {
+      const days = Array(7).fill(false);
+      (state.sessions || []).forEach(session => { const date = new Date(`${session.date}T00:00:00`); const diff = Math.round((new Date(`${todayKey()}T00:00:00`) - date) / 86400000); if (diff >= 0 && diff < 7) days[date.getDay()] = true; });
+      return days;
+    }
+    function drawBuddy(canvas, xp) {
+      if (!canvas) return;
+      const context = canvas.getContext('2d'); context.imageSmoothingEnabled = false; context.clearRect(0, 0, 16, 16);
+      const pixels = [
+        '................', '.....gg..gg.....', '....gggggggg....', '...gggggggggg...', '..gggggggggggg..', '..gggggggggggg..', '..ggwwggggwwgg..', '..ggwwggggwwgg..', '..gggggggggggg..', '...ggggbbgggg...', '....gggbbggg....', '.....bbbbbb.....', '....bb....bb....', '...bbb....bbb...', '................', '................'
+      ];
+      const level = Math.floor(xp / 100);
+      const palette = { g: level > 3 ? '#82a856' : '#6b9b68', w: '#fff8df', b: '#475b48' };
+      pixels.forEach((row, y) => [...row].forEach((pixel, x) => { if (pixel !== '.') { context.fillStyle = palette[pixel]; context.fillRect(x, y, 1, 1); } }));
+    }
+    function showToast(message) {
+      const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show');
+      clearTimeout(toastTimeout); toastTimeout = setTimeout(() => toast.classList.remove('show'), 2700);
+    }
+    function openForm({ title, fields, submitLabel = 'Save', onSubmit, deleteAction = null }) {
+      const dialog = document.getElementById('editDialog'); const form = document.getElementById('editForm'); activeDialogSubmit = onSubmit;
+      form.innerHTML = `<div class="dialog-head"><h2>${escapeHtml(title)}</h2><button type="button" class="icon-button" data-close-dialog aria-label="Close">×</button></div>${fields.map(field => `<div class="field"><label for="field-${escapeHtml(field.name)}">${escapeHtml(field.label)}</label>${field.type === 'select' ? `<select id="field-${escapeHtml(field.name)}" name="${escapeHtml(field.name)}">${field.options.map(option => `<option value="${escapeHtml(option.value)}" ${option.value === field.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}</select>` : field.type === 'textarea' ? `<textarea id="field-${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" placeholder="${escapeHtml(field.placeholder || '')}" ${field.required === false ? '' : 'required'}>${escapeHtml(field.value || '')}</textarea>` : `<input id="field-${escapeHtml(field.name)}" name="${escapeHtml(field.name)}" type="${escapeHtml(field.type || 'text')}" value="${escapeHtml(field.value || '')}" placeholder="${escapeHtml(field.placeholder || '')}" ${field.required === false ? '' : 'required'}>`}</div>`).join('')}<div class="dialog-actions">${deleteAction ? '<button type="button" class="delete-button" data-dialog-delete>Delete</button>' : ''}<button type="button" class="quiet-button" data-close-dialog>Cancel</button><button class="primary-button" type="submit">${escapeHtml(submitLabel)}</button></div>`;
+      dialog.showModal();
+      form.querySelector('input,textarea,select')?.focus();
+      if (deleteAction) form.querySelector('[data-dialog-delete]').addEventListener('click', () => { dialog.close(); deleteAction(); });
+    }
+    function askClass(cls = null) {
+      openForm({ title: cls ? 'Edit class' : 'Add a class', fields: [
+        { name: 'name', label: 'Class name', value: cls?.name || '', placeholder: 'e.g. Environmental Science' },
+        { name: 'color', label: 'Color', type: 'select', value: cls?.color || COLORS[state.classes.length % COLORS.length], options: COLORS.map((color, index) => ({ value: color, label: ['Leaf', 'Coral', 'Sky', 'Sunflower', 'Lilac', 'Peach'][index] })) }
+      ], deleteAction: cls ? () => { if (confirm(`Delete ${cls.name} and all its units?`)) { state.classes = state.classes.filter(item => item.id !== cls.id); state.selectedView = 'today'; state.selectedClass = null; saveState(); render(); } } : null, onSubmit: data => {
+        if (cls) { cls.name = data.name.trim(); cls.color = data.color; }
+        else { const created = { id: makeId(), name: data.name.trim(), color: data.color, units: [], lectureNotes: [], archived: false }; state.classes.push(created); state.selectedView = 'class'; state.selectedClass = created.id; }
+        saveState(); render(); showToast(cls ? 'Class updated.' : 'Your new class is ready.');
+      } });
+    }
+    function askUnit(classId, unit = null) {
+      const cls = state.classes.find(item => item.id === classId); if (!cls) return;
+      openForm({ title: unit ? 'Edit unit' : 'Add a unit', fields: [{ name: 'name', label: 'Unit name', value: unit?.name || '', placeholder: 'e.g. Ecosystems' }], deleteAction: unit ? () => deleteUnit(classId, unit.id) : null, onSubmit: data => {
+        if (unit) unit.name = data.name.trim(); else cls.units.push({ id: makeId(), name: data.name.trim(), tasks: [], links: [] });
+        saveState(); render(); showToast(unit ? 'Unit updated.' : 'Unit added.');
+      } });
+    }
+    function askTask(classId, unitId, task = null) {
+      const unit = findUnit(classId, unitId); if (!unit) return;
+      openForm({ title: task ? 'Edit study task' : 'Add a study task', fields: [{ name: 'title', label: 'What would you like to do?', value: task?.title || '', placeholder: 'e.g. Review lecture notes' }], deleteAction: task ? () => deleteTask(classId, unitId, task.id) : null, onSubmit: data => {
+        if (task) task.title = data.title.trim(); else unit.tasks.push({ id: makeId(), title: data.title.trim(), done: false });
+        saveState(); render(); showToast(task ? 'Task updated.' : 'Task added.');
+      } });
+    }
+    function askLink(classId, unitId, link = null) {
+      const unit = findUnit(classId, unitId); if (!unit) return;
+      openForm({ title: link ? 'Edit resource link' : 'Add a resource link', fields: [{ name: 'title', label: 'Link title', value: link?.title || '', placeholder: 'e.g. Practice quiz' }, { name: 'url', label: 'URL', type: 'url', value: link?.url || '', placeholder: 'https://example.com/resource' }], deleteAction: link ? () => deleteLink(classId, unitId, link.id) : null, onSubmit: data => {
+        const url = data.url.trim();
+        if (link) { link.title = data.title.trim(); link.url = url; } else unit.links.push({ id: makeId(), title: data.title.trim(), url });
+        saveState(); render(); showToast(link ? 'Link updated.' : 'Link added.');
+      } });
+    }
+    function findUnit(classId, unitId) { return state.classes.find(cls => cls.id === classId)?.units.find(unit => unit.id === unitId); }
+    function findTask(taskId) {
+      for (const cls of state.classes) for (const unit of cls.units) { const task = unit.tasks.find(item => item.id === taskId); if (task) return { cls, unit, task }; }
+      return null;
+    }
+    function findLink(linkId) {
+      for (const cls of state.classes) for (const unit of cls.units) { const link = unit.links.find(item => item.id === linkId); if (link) return { cls, unit, link }; }
+      return null;
+    }
+    function deleteUnit(classId, unitId) {
+      const cls = state.classes.find(item => item.id === classId); if (!cls) return;
+      if (confirm('Delete this unit, its tasks, and its links?')) { cls.units = cls.units.filter(unit => unit.id !== unitId); saveState(); render(); showToast('Unit deleted.'); }
+    }
+    function deleteTask(classId, unitId, taskId) {
+      const unit = findUnit(classId, unitId); if (!unit) return;
+      if (confirm('Delete this study task?')) { unit.tasks = unit.tasks.filter(task => task.id !== taskId); saveState(); render(); showToast('Task deleted.'); }
+    }
+    function deleteLink(classId, unitId, linkId) {
+      const unit = findUnit(classId, unitId); if (!unit) return;
+      if (confirm('Delete this resource link?')) { unit.links = unit.links.filter(link => link.id !== linkId); saveState(); render(); showToast('Link deleted.'); }
+    }
+    function toggleTask(taskId) {
+      const found = findTask(taskId); if (!found) return;
+      found.task.done = !found.task.done;
+      if (found.task.done) { state.xp += 10; updateStreak(todayKey()); showToast('Task checked off! +10 XP'); }
+      saveState(); render();
+    }
+    document.addEventListener('click', event => {
+      const target = event.target.closest('button'); if (!target) return;
+      if (target.dataset.view) { state.selectedView = target.dataset.view; state.selectedClass = null; saveState(); render(); }
+      else if (target.dataset.class) { state.selectedView = 'class'; state.selectedClass = target.dataset.class; saveState(); render(); }
+      else if (target.dataset.cadence) { routineCadence = target.dataset.cadence; render(); }
+      else if (target.dataset.selectDate) { selectedCalendarDate = target.dataset.selectDate; render(); }
+      else if (target.dataset.monthShift) { calendarCursor.setMonth(calendarCursor.getMonth() + Number(target.dataset.monthShift)); selectedCalendarDate = localDateKey(new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), 1)); render(); }
+      else if (target.id === 'addClassButton' || target.id === 'addClassLink') askClass();
+      else if (target.dataset.archiveClass) archiveClass(target.dataset.archiveClass);
+      else if (target.dataset.restoreClass) restoreClass(target.dataset.restoreClass);
+      else if (target.dataset.deleteArchived) {
+        const cls = state.classes.find(item => item.id === target.dataset.deleteArchived);
+        if (cls && confirm(`Permanently delete ${cls.name} and all of its work?`)) { state.classes = state.classes.filter(item => item.id !== cls.id); saveState(); render(); showToast('Archived class deleted.'); }
+      }
+      else if (target.dataset.editClass) askClass(state.classes.find(cls => cls.id === target.dataset.editClass));
+      else if (target.dataset.addLectureNote) askLectureNote(target.dataset.addLectureNote);
+      else if (target.dataset.editLectureNote) {
+        const cls = state.classes.find(item => item.id === state.selectedClass);
+        const note = cls?.lectureNotes?.find(item => item.id === target.dataset.editLectureNote);
+        if (note) askLectureNote(cls.id, note);
+      }
+      else if (target.dataset.deleteLectureNote) deleteLectureNote(state.selectedClass, target.dataset.deleteLectureNote);
+      else if (target.dataset.routineToggle) toggleRoutine(target.dataset.routineToggle);
+      else if (target.dataset.eventComplete) toggleEventCompletion(target.dataset.eventComplete, target.dataset.eventDate);
+      else if (target.dataset.assignTask) askTaskListAssignment(target.dataset.assignTask);
+      else if (target.dataset.scheduleTask) scheduleTask(target.dataset.scheduleTask);
+      else if (target.dataset.scheduleRoutine) scheduleRoutine(target.dataset.scheduleRoutine);
+      else if (target.dataset.editRoutine) askRoutineTask(routineCadence, state.routines.find(task => task.id === target.dataset.editRoutine));
+      else if (target.dataset.deleteRoutine) {
+        if (confirm('Delete this recurring task?')) { state.routines = state.routines.filter(task => task.id !== target.dataset.deleteRoutine); saveState(); render(); showToast('Task deleted.'); }
+      }
+      else if (target.dataset.action === 'add-routine') askRoutineTask(routineCadence);
+      else if (target.dataset.action === 'add-event') askEvent();
+      else if (target.dataset.action === 'export-calendar') downloadCalendar();
+      else if (target.dataset.editEvent) askEvent(state.events.find(event => event.id === target.dataset.editEvent));
+      else if (target.dataset.deleteEvent) deleteEvent(target.dataset.deleteEvent);
+      else if (target.dataset.addUnit) askUnit(target.dataset.addUnit);
+      else if (target.dataset.editUnit) askUnit(state.selectedClass, findUnit(state.selectedClass, target.dataset.editUnit));
+      else if (target.dataset.deleteUnit) deleteUnit(state.selectedClass, target.dataset.deleteUnit);
+      else if (target.dataset.addTask) askTask(state.selectedClass, target.dataset.addTask);
+      else if (target.dataset.editTask) { const found = findTask(target.dataset.editTask); if (found) askTask(found.cls.id, found.unit.id, found.task); }
+      else if (target.dataset.deleteTask) { const found = findTask(target.dataset.deleteTask); if (found) deleteTask(found.cls.id, found.unit.id, found.task.id); }
+      else if (target.dataset.addLink) askLink(state.selectedClass, target.dataset.addLink);
+      else if (target.dataset.editLink) { const found = findLink(target.dataset.editLink); if (found) askLink(found.cls.id, found.unit.id, found.link); }
+      else if (target.dataset.deleteLink) { const found = findLink(target.dataset.deleteLink); if (found) deleteLink(found.cls.id, found.unit.id, found.link.id); }
+      else if (target.dataset.taskToggle) toggleTask(target.dataset.taskToggle);
+      else if (target.dataset.action === 'quick-task') {
+        const cls = state.classes[0];
+        if (!cls) { askClass(); return; }
+        if (!cls.units.length) { state.selectedView = 'class'; state.selectedClass = cls.id; saveState(); render(); askUnit(cls.id); return; }
+        askTask(cls.id, cls.units[0].id);
+      }
+      else if (target.dataset.action === 'start-focus') { state.selectedView = 'focus'; saveState(); render(); }
+      else if (target.id === 'timerToggle') startTimer();
+      else if (target.id === 'timerReset') { timerRunning = false; clearInterval(timerInterval); timerInterval = null; timerSeconds = timerMode === 'focus' ? Number(document.getElementById('timerLength').value) * 60 : 5 * 60; updateTimerDisplay(); }
+      else if (target.id === 'breakMode') { timerRunning = false; clearInterval(timerInterval); timerInterval = null; timerMode = 'break'; timerSeconds = 5 * 60; render(); }
+      else if (target.hasAttribute('data-close-dialog')) document.getElementById('editDialog').close();
+    });
+    document.getElementById('editForm').addEventListener('submit', event => {
+      event.preventDefault(); const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+      document.getElementById('editDialog').close(); activeDialogSubmit?.(data);
+    });
+    document.getElementById('editDialog').addEventListener('click', event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
+    document.addEventListener('change', event => {
+      if (event.target.id === 'timerLength' && !timerRunning && timerMode === 'focus') { timerSessionMinutes = Number(event.target.value); timerSeconds = timerSessionMinutes * 60; updateTimerDisplay(); }
+    });
+    render();
+  </script>
+</body>
+</html>
